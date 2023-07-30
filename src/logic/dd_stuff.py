@@ -4,13 +4,13 @@ import json
 
 from bs4 import BeautifulSoup
 
-from src.logic.Mod import Mod, ModSources
-from src.logic.SaveManager import SaveFileManager
-import src.logic.util as util
-from src.logic.cacheModMetadata import MetadataCache
-import src.logic.scrapper as scrapper
-from src.logic.ModMetadata import ModMetadata
-from src.constants.paths import *
+from logic.Mod import Mod, ModSources
+from logic.SaveManager import SaveFileManager
+import logic.util as util
+from logic.cacheModMetadata import MetadataCache
+import logic.scrapper as scrapper
+from logic.ModMetadata import ModMetadata
+from constants.paths import *
 
 
 def get_mods_from_folder(mod_dir_path, source=ModSources.Local):

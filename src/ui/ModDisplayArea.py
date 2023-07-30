@@ -2,7 +2,7 @@ from PySide2.QtWidgets import QWidget, QVBoxLayout
 from PySide2.QtCore import Signal, Qt
 
 
-class VDragWidget(QWidget):
+class ModDisplayArea(QWidget):
     orderChanged = Signal((object, bool))
     itemClicked = Signal(object)
 

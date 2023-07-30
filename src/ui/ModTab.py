@@ -1,14 +1,17 @@
 import io
+import os
 import traceback
 
 from PySide2.QtCore import QObject
-from PySide2.QtWidgets import QWidget, QScrollArea, QHBoxLayout, QVBoxLayout, QGroupBox, QPushButton, QFileDialog, QMessageBox, QInputDialog, QLineEdit
+from PySide2.QtWidgets import QWidget, QScrollArea, QHBoxLayout, QVBoxLayout, QGroupBox, QPushButton, QFileDialog, \
+    QMessageBox, QInputDialog, QLineEdit
 
-import src.logic.dd_stuff as dd_stuff
-from src.ui.ModItem import ModItem
-from src.ui.VDragWidget import VDragWidget
-from src.ui.ModInfoTab import ModInfoTab
-from src.logic.ModDB import ModDB
+import logic.dd_stuff as dd_stuff
+from ui.ModItem import ModItem
+from ui.ModDisplayArea import ModDisplayArea
+from ui.ModInfoTab import ModInfoTab
+from logic.ModDB import ModDB
+from constants.paths import *
 
 
 class ModTab(QWidget):
@@ -29,11 +32,11 @@ class ModTab(QWidget):
 
         activeScroll = QScrollArea(self)
         activeScroll.setWidgetResizable(True)
-        self.activeModsWidget = VDragWidget()
+        self.activeModsWidget = ModDisplayArea()
 
         installedScroll = QScrollArea(self)
         installedScroll.setWidgetResizable(True)
-        self.installedModsWidget = VDragWidget()
+        self.installedModsWidget = ModDisplayArea()
 
         self.refresh()
 
@@ -60,6 +63,10 @@ class ModTab(QWidget):
 
         actionBtnsLayout.addStretch(0)
 
+        btn = QPushButton("Play", actionBtnsGroup)
+        btn.clicked.connect(self._startGame)
+        actionBtnsLayout.addWidget(btn)
+
         btn = QPushButton("Save", actionBtnsGroup)
         btn.clicked.connect(self._saveChanges)
         actionBtnsLayout.addWidget(btn)
@@ -68,8 +75,8 @@ class ModTab(QWidget):
         btn.clicked.connect(self._exportModlist)
         actionBtnsLayout.addWidget(btn)
 
-        btn = QPushButton("Import Local", actionBtnsGroup)
-        btn.clicked.connect(self._importLocalModlist)
+        btn = QPushButton("Import CSV", actionBtnsGroup)
+        btn.clicked.connect(self._importCsvModlist)
         actionBtnsLayout.addWidget(btn)
 
         btn = QPushButton("Import URL", actionBtnsGroup)
@@ -94,15 +101,10 @@ class ModTab(QWidget):
         self.installedModsWidget.clear()
         self.activeModsWidget.clear()
 
-        # installedMods, uninstalledMods, disabledMods, enabledMods = ModDB.dump()
-
         for mod in ModDB.disabledMods:
             self.installedModsWidget.add_item(ModItem(mod))
         for mod in ModDB.enabledMods:
             self.activeModsWidget.add_item(ModItem(mod))
-
-        # self.installedModsWidget.adjustSize()
-        # self.activeModsWidget.adjustSize()
 
     def _handleOrderChange(self, container, moved):
         print(container, moved)
@@ -114,6 +116,14 @@ class ModTab(QWidget):
         self.modInfoTab.loadMod(modItem.mod)
 
     # Btn event functions
+    def _startGame(self):
+        if "GAME_FOLDER" in os.environ and os.path.exists(f'{os.environ["GAME_FOLDER"]}/_windows/Darkest.exe'):
+            print("Starting game")
+            os.chdir(os.environ["GAME_FOLDER"])
+            os.popen(f'{os.environ["GAME_FOLDER"]}/_windows/Darkest.exe')
+            os.chdir(os.environ["APP_PATH"])
+            self.window().close()
+
     def _saveChanges(self):
         print("Save changes")
         try:
@@ -129,19 +139,21 @@ class ModTab(QWidget):
 
     def _exportModlist(self):
         print("Export modlist")
-        path, _ = QFileDialog.getSaveFileName(self, QObject.tr(self, "File to export"), "./modlists/modlist.csv", QObject.tr(self, "CSV files (*.csv)"))
+        path, _ = QFileDialog.getSaveFileName(self, QObject.tr(self, "File to export"),
+                                              f"{MODLISTS_FOLDER}/modlist.csv", QObject.tr(self, "CSV files (*.csv)"))
 
         if path:
             dd_stuff.exportModlist(path, self.activeModsWidget.getItemsData())
 
             QMessageBox(QMessageBox.Icon.NoIcon, "Success", f"Successfully exported modlist to:\n{path}").exec_()
 
-    def _importLocalModlist(self):
+    def _importCsvModlist(self):
         print("Import modlist")
-        path, _ = QFileDialog.getOpenFileName(self, QObject.tr(self, "Modlist to import"), "./modlists", QObject.tr(self, "CSV files (*.csv)"))
+        path, _ = QFileDialog.getOpenFileName(self, QObject.tr(self, "Modlist to import"), MODLISTS_FOLDER,
+                                              QObject.tr(self, "CSV files (*.csv)"))
 
         if path:
-            ModDB.loadLocalModlist(path)
+            ModDB.loadCsvModlist(path)
             self.refresh()
 
             QMessageBox(QMessageBox.Icon.NoIcon, "Success", f"Successfully imported modlist from:\n{path}").exec_()
@@ -155,4 +167,5 @@ class ModTab(QWidget):
                 self.refresh()
             except Exception as e:
                 traceback.print_exc()
-                QMessageBox(QMessageBox.Icon.Critical, "Error", f"Failed to load the modlist from the URL:\n{e}").exec_()
+                QMessageBox(QMessageBox.Icon.Critical, "Error",
+                            f"Failed to load the modlist from the URL:\n{e}").exec_()

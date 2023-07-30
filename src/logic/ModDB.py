@@ -1,4 +1,4 @@
-import src.logic.dd_stuff as dd_stuff
+import logic.dd_stuff as dd_stuff
 
 
 class _ModDBSingleton(object):
@@ -16,7 +16,7 @@ class _ModDBSingleton(object):
     def initialize(self):
         self.reload()
 
-    def loadLocalModlist(self, modlist_path):
+    def loadCsvModlist(self, modlist_path):
         self.installedMods, self.uninstalledMods, self.disabledMods, self.enabledMods =\
             dd_stuff.importCsvModlist(modlist_path, self.installedMods)
 

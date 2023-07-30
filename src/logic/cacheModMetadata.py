@@ -1,9 +1,9 @@
 import csv
 import os
 
-from src.logic.ModMetadata import ModMetadata
+from logic.ModMetadata import ModMetadata
 
-from src.constants.paths import *
+from constants.paths import *
 
 
 class _MetadataCacheSingleton:
@@ -58,4 +58,5 @@ class _MetadataCacheSingleton:
         return ModMetadata(row[0], row[1], row[2], row[3], row[4], row[5])
 
 
+# exportable singleton
 MetadataCache = _MetadataCacheSingleton()

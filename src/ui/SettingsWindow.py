@@ -5,7 +5,7 @@ from PySide2.QtCore import QObject, Signal
 from PySide2.QtWidgets import QFileDialog, QGridLayout, QPushButton, QLabel, QLineEdit,\
     QComboBox, QVBoxLayout, QGroupBox, QHBoxLayout, QDialog
 
-from src.constants.paths import *
+from constants.paths import *
 
 
 class SettingsWindow(QDialog):

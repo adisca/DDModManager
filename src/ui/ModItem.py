@@ -1,6 +1,8 @@
 from PySide2.QtCore import Qt, QMimeData, Signal
-from PySide2.QtGui import QDrag, QPixmap, QPalette, QColor, QTextFormat, QFont, QFontMetrics
-from PySide2.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton, QGroupBox, QGridLayout
+from PySide2.QtGui import QDrag, QPixmap, QPalette, QColor, QFont, QFontMetrics
+from PySide2.QtWidgets import QWidget, QHBoxLayout, QLabel
+
+from constants.paths import *
 
 
 class ModItem(QWidget):
@@ -27,7 +29,7 @@ class ModItem(QWidget):
         hbox.setContentsMargins(5, 5, 5, 5)
 
         labelImg = QLabel(self)
-        img = QPixmap(("./assets/preview_icon.png" if (self.mod.img is None) else self.mod.img))
+        img = QPixmap((PLACEHOLDER_IMG if (self.mod.img is None) else self.mod.img))
         img = img.scaled(self.IMG_W, self.IMG_H, Qt.KeepAspectRatio)
         labelImg.setPixmap(img)
         labelImg.setMargin(0)

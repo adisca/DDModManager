@@ -4,9 +4,10 @@ from PySide2.QtGui import QIcon, QColor, QPalette
 from PySide2.QtWidgets import QApplication, QMainWindow, QAction
 from PySide2.QtCore import Qt
 
-from src.ui.ModTab import ModTab
-from src.ui.SettingsWindow import SettingsWindow
-from src.ui.PreferencesWindow import PreferencesWindow
+from ui.ModTab import ModTab
+from ui.SettingsWindow import SettingsWindow
+from ui.PreferencesWindow import PreferencesWindow
+from constants.paths import *
 
 
 class MainWindow(QMainWindow):
@@ -15,7 +16,7 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("DD Mod Manager")
         self.setGeometry(300, 200, 1500, 700)
-        self.setWindowIcon(QIcon("./assets/preview_icon.png"))
+        self.setWindowIcon(QIcon(PLACEHOLDER_IMG))
 
         self.createMenus()
         self.modTab = ModTab()
