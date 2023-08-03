@@ -9,11 +9,16 @@ class ModSources:
 
 
 class Mod:
-    def __init__(self, mod_id, mod_name, source, mod_img=None, active=False, installed=True, metadata=None):
+    def __init__(self, mod_id, mod_name, source, mod_img=None, desc="", tags=None, active=False, installed=True, metadata=None):
+        if tags is None:
+            tags = []
+
         self.id = mod_id
         self.name = mod_name
         self.source = source
         self.img = mod_img
+        self.desc = desc
+        self.tags = tags
         self.active = active
         self.installed = installed
         self.metadata = metadata

@@ -36,7 +36,6 @@ class ModDisplayArea(QWidget):
             drop_here = pos.y() < w.y() + w.size().height() // 2 + compensate
 
             if drop_here:
-                print(pos.y(), w.y() + w.size().height() // 2)
                 self.blayout.insertWidget(n, widget)
                 self.orderChanged.emit(widget.parent(), moved)
                 break

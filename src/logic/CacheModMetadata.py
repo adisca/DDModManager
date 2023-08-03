@@ -1,5 +1,6 @@
 import csv
 import os
+import ast
 
 from logic.ModMetadata import ModMetadata
 
@@ -14,6 +15,9 @@ class _MetadataCacheSingleton:
         if not hasattr(cls, 'instance'):
             cls.instance = super(_MetadataCacheSingleton, cls).__new__(cls)
         return cls.instance
+
+    def getById(self, meta_id, default=None):
+        return next((m for m in self.cache if m.id == meta_id), default)
 
     def loadCache(self):
         self.cache = []
@@ -55,8 +59,15 @@ class _MetadataCacheSingleton:
 
     @staticmethod
     def convertCsvRowToModMetadata(row):
-        return ModMetadata(row[0], row[1], row[2], row[3], row[4], row[5])
+        return ModMetadata(
+            row[0],
+            row[1],
+            ast.literal_eval(row[2]),
+            ast.literal_eval(row[3]),
+            ast.literal_eval(row[4]),
+            ast.literal_eval(row[5])
+        )
 
 
 # exportable singleton
-MetadataCache = _MetadataCacheSingleton()
+metadataCache = _MetadataCacheSingleton()

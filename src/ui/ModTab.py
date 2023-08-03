@@ -7,9 +7,9 @@ from PySide2.QtWidgets import QWidget, QScrollArea, QHBoxLayout, QVBoxLayout, QG
     QMessageBox, QInputDialog, QLineEdit
 
 import logic.dd_stuff as dd_stuff
-from ui.ModItem import ModItem
-from ui.ModDisplayArea import ModDisplayArea
-from ui.ModInfoTab import ModInfoTab
+from ui.modManagement.ModItem import ModItem
+from ui.modManagement.ModDisplayArea import ModDisplayArea
+from ui.modInfo.ModInfoPanel import ModInfoScreen
 from logic.ModDB import ModDB
 from constants.paths import *
 
@@ -28,28 +28,28 @@ class ModTab(QWidget):
         modsOpWidget = QWidget()
         modsOpLayout = QHBoxLayout()
 
-        self.modInfoTab = ModInfoTab()
+        self.modInfoTab = ModInfoScreen()
 
-        activeScroll = QScrollArea(self)
-        activeScroll.setWidgetResizable(True)
-        self.activeModsWidget = ModDisplayArea()
+        disabledScroll = QScrollArea(self)
+        disabledScroll.setWidgetResizable(True)
+        self.disabledModsWidget = ModDisplayArea()
 
-        installedScroll = QScrollArea(self)
-        installedScroll.setWidgetResizable(True)
-        self.installedModsWidget = ModDisplayArea()
+        enabledScroll = QScrollArea(self)
+        enabledScroll.setWidgetResizable(True)
+        self.enabledModsWidget = ModDisplayArea()
 
         self.refresh()
 
-        installedScroll.setWidget(self.installedModsWidget)
-        activeScroll.setWidget(self.activeModsWidget)
+        disabledScroll.setWidget(self.disabledModsWidget)
+        enabledScroll.setWidget(self.enabledModsWidget)
 
-        self.installedModsWidget.orderChanged.connect(self._handleOrderChange)
-        self.installedModsWidget.itemClicked.connect(self._handleItemClicked)
-        self.activeModsWidget.orderChanged.connect(self._handleOrderChange)
-        self.activeModsWidget.itemClicked.connect(self._handleItemClicked)
+        self.disabledModsWidget.orderChanged.connect(self._handleOrderChange)
+        self.disabledModsWidget.itemClicked.connect(self._handleItemClicked)
+        self.enabledModsWidget.orderChanged.connect(self._handleOrderChange)
+        self.enabledModsWidget.itemClicked.connect(self._handleItemClicked)
 
-        modsOpLayout.addWidget(installedScroll)
-        modsOpLayout.addWidget(activeScroll)
+        modsOpLayout.addWidget(disabledScroll)
+        modsOpLayout.addWidget(enabledScroll)
         modsOpLayout.addWidget(self.modInfoTab)
 
         modsOpWidget.setLayout(modsOpLayout)
@@ -98,18 +98,22 @@ class ModTab(QWidget):
         self.refresh()
 
     def refresh(self):
-        self.installedModsWidget.clear()
-        self.activeModsWidget.clear()
+        self.disabledModsWidget.clear()
+        self.enabledModsWidget.clear()
 
         for mod in ModDB.disabledMods:
-            self.installedModsWidget.add_item(ModItem(mod))
+            self.disabledModsWidget.add_item(ModItem(mod))
         for mod in ModDB.enabledMods:
-            self.activeModsWidget.add_item(ModItem(mod))
+            self.enabledModsWidget.add_item(ModItem(mod))
 
+    # Might want to change order in ModDB too, otherwise it is changed only in the ui
     def _handleOrderChange(self, container, moved):
-        print(container, moved)
-        # self.installedModsWidget.adjustSize()
-        # self.activeModsWidget.adjustSize()
+        if self.disabledModsWidget == container:
+            print(f"Moved to disabled column. {'Changed' if moved else 'Unchanged'} column.")
+        elif self.enabledModsWidget == container:
+            print(f"Moved to enabled column. {'Changed' if moved else 'Unchanged'} column.")
+        else:
+            print("Unrecognised column.")
 
     def _handleItemClicked(self, modItem):
         print(modItem.mod.toString())
@@ -127,7 +131,7 @@ class ModTab(QWidget):
     def _saveChanges(self):
         print("Save changes")
         try:
-            dd_stuff.writeModsAndSave(self.activeModsWidget.getItemsData())
+            dd_stuff.writeModsAndSave(self.enabledModsWidget.getItemsData())
             self.reload()
             QMessageBox(QMessageBox.Icon.Information, "Success", "Successfully enabled the mods").exec_()
         except FileNotFoundError:
@@ -143,7 +147,7 @@ class ModTab(QWidget):
                                               f"{MODLISTS_FOLDER}/modlist.csv", QObject.tr(self, "CSV files (*.csv)"))
 
         if path:
-            dd_stuff.exportModlist(path, self.activeModsWidget.getItemsData())
+            dd_stuff.exportModlist(path, self.enabledModsWidget.getItemsData())
 
             QMessageBox(QMessageBox.Icon.NoIcon, "Success", f"Successfully exported modlist to:\n{path}").exec_()
 

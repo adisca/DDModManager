@@ -4,7 +4,7 @@ import ctypes
 from ui.gui import run
 import dotenv
 from logic.ModDB import ModDB
-from logic.cacheModMetadata import MetadataCache
+from logic.CacheModMetadata import metadataCache
 from constants.paths import *
 
 
@@ -25,7 +25,7 @@ if __name__ == '__main__':
     os.makedirs(os.path.dirname(TARGET_JSON), exist_ok=True)
     os.makedirs(MODLISTS_FOLDER, exist_ok=True)
 
-    MetadataCache.loadCache()
+    metadataCache.loadCache()
     ModDB.initialize()
 
     run()

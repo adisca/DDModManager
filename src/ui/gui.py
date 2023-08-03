@@ -5,9 +5,9 @@ from PySide2.QtWidgets import QApplication, QMainWindow, QAction
 from PySide2.QtCore import Qt
 
 from ui.ModTab import ModTab
-from ui.SettingsWindow import SettingsWindow
-from ui.PreferencesWindow import PreferencesWindow
-from constants.paths import *
+from ui.menus.SettingsWindow import SettingsWindow
+from ui.menus.PreferencesWindow import PreferencesWindow
+from constants.pathsImgs import *
 
 
 class MainWindow(QMainWindow):

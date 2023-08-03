@@ -2,7 +2,7 @@ from PySide2.QtCore import Qt, QMimeData, Signal
 from PySide2.QtGui import QDrag, QPixmap, QPalette, QColor, QFont, QFontMetrics
 from PySide2.QtWidgets import QWidget, QHBoxLayout, QLabel
 
-from constants.paths import *
+from constants.pathsImgs import *
 
 
 class ModItem(QWidget):
@@ -17,13 +17,13 @@ class ModItem(QWidget):
     def __init__(self, mod):
         super().__init__()
         self.mod = mod
+
+        self._initialize()
+
+    def _initialize(self):
         self.setFixedSize(self.SIZE_W, self.SIZE_H)
+        self.setToolTip(f"ID: {self.mod.id}\nSource: {self.mod.source}\nActive: {self.mod.active}")
 
-        self.setToolTip(f"ID: {mod.id}\nSource: {mod.source}\nActive: {mod.active}")
-
-        self.initialize()
-
-    def initialize(self):
         hbox = QHBoxLayout()
         hbox.setSpacing(5)
         hbox.setContentsMargins(5, 5, 5, 5)

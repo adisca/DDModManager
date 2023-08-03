@@ -1,13 +1,14 @@
 import os
 import csv
 import json
+import traceback
 
 from bs4 import BeautifulSoup
 
 from logic.Mod import Mod, ModSources
 from logic.SaveManager import SaveFileManager
 import logic.util as util
-from logic.cacheModMetadata import MetadataCache
+from logic.CacheModMetadata import metadataCache
 import logic.scrapper as scrapper
 from logic.ModMetadata import ModMetadata
 from constants.paths import *
@@ -24,8 +25,41 @@ def get_mods_from_folder(mod_dir_path, source=ModSources.Local):
                     file_contents = f.read()
                 bs_data = BeautifulSoup(file_contents, "xml")
 
-                mod_id = bs_data.find("PublishedFileId").text
-                mod_name = bs_data.find("Title").text
+                try:
+                    mod_id = bs_data.find("PublishedFileId").text
+                    mod_name = bs_data.find("Title").text
+                except Exception:
+                    print(f"Mod id or name could not be read from fields PublishedFileId, Title respectively. Path: {dir_path}")
+                    traceback.print_exc()
+                    continue
+
+                mod_img_xml = bs_data.find("PreviewIconFile")
+                if mod_img_xml:
+                    mod_img = mod_img_xml.text
+                else:
+                    mod_img = None
+
+                mod_desc_xml = bs_data.find("ItemDescription")
+                if mod_desc_xml:
+                    mod_desc = mod_desc_xml.text
+                else:
+                    mod_desc = ""
+
+                mod_tags = []
+                mod_tag_group_xml = bs_data.find("Tags")
+                if mod_tag_group_xml:
+                    mod_tags_xml = mod_tag_group_xml.find_all("Tags")
+
+                    if not len(mod_tags_xml):
+                        print(f"Mod {mod_id} {mod_name} has a tag container but no tags")
+                    else:
+                        for tag_xml in mod_tags_xml:
+                            if tag_xml.text:
+                                mod_tags.append(tag_xml.text.lower())
+                            else:
+                                print(f"Mod {mod_id} {mod_name} has an empty tag")
+                else:
+                    print(f"Mod {mod_id} {mod_name} has no tags")
 
                 ok = True
                 if source == ModSources.Local and mod_name in [x.name for x in mods]:
@@ -40,7 +74,9 @@ def get_mods_from_folder(mod_dir_path, source=ModSources.Local):
                         mod_id,
                         mod_name,
                         source,
-                        f'{dir_path}/{bs_data.find("PreviewIconFile").text}'
+                        mod_img=(f"{dir_path}/{mod_img}" if mod_img else None),
+                        desc=mod_desc,
+                        tags=mod_tags
                     ))
                 break
     return mods
@@ -220,12 +256,12 @@ def getCategorisedMods():
 
 
 def getFromCache(installed_mods, uninstalled_mods):
-    for uncached_mod in MetadataCache.retrieveModsMetadata(installed_mods):
+    for uncached_mod in metadataCache.retrieveModsMetadata(installed_mods):
         uncached_mod.setMetadata(ModMetadata(*scrapper.get_mod_info_by_id(uncached_mod.id)))
-        MetadataCache.addToCache([uncached_mod.metadata])
-    for uncached_mod in MetadataCache.retrieveModsMetadata(uninstalled_mods):
+        metadataCache.addToCache([uncached_mod.metadata])
+    for uncached_mod in metadataCache.retrieveModsMetadata(uninstalled_mods):
         if uncached_mod.id:
             uncached_mod.setMetadata(ModMetadata(*scrapper.get_mod_info_by_id(uncached_mod.id)))
-            MetadataCache.addToCache([uncached_mod.metadata])
-    MetadataCache.saveCache()
+            metadataCache.addToCache([uncached_mod.metadata])
+    metadataCache.saveCache()
 
