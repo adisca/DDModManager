@@ -1,8 +1,10 @@
 import os
+from typing import Callable
+
 import dotenv
 
 from PySide2.QtCore import QObject, Signal
-from PySide2.QtWidgets import QFileDialog, QGridLayout, QPushButton, QLabel, QLineEdit,\
+from PySide2.QtWidgets import QFileDialog, QGridLayout, QPushButton, QLabel, QLineEdit, \
     QComboBox, QVBoxLayout, QGroupBox, QHBoxLayout, QDialog
 
 from constants.paths import *
@@ -17,9 +19,9 @@ class SettingsWindow(QDialog):
         self.setWindowTitle("Paths settings")
         self.setGeometry(300, 200, 500, 300)
 
-        self.createLayout()
+        self._createLayout()
 
-    def createLayout(self):
+    def _createLayout(self) -> None:
         vboxLayout = QVBoxLayout()
 
         gridLayout = QGridLayout()
@@ -37,7 +39,8 @@ class SettingsWindow(QDialog):
         gridLayout.addWidget(label, row, col)
         col += 1
 
-        self.txtSaveEditorJar = QLineEdit((os.environ["SAVE_EDITOR_JAR_PATH"] if "SAVE_EDITOR_JAR_PATH" in os.environ else ""), self)
+        self.txtSaveEditorJar = QLineEdit(
+            (os.environ["SAVE_EDITOR_JAR_PATH"] if "SAVE_EDITOR_JAR_PATH" in os.environ else ""), self)
         gridLayout.addWidget(self.txtSaveEditorJar, row, col)
         col += 1
 
@@ -71,7 +74,8 @@ class SettingsWindow(QDialog):
         gridLayout.addWidget(label, row, col)
         col += 1
 
-        self.txtModsFolderSteam = QLineEdit((os.environ["MODS_FOLDER_STEAM"] if "MODS_FOLDER_STEAM" in os.environ else ""), self)
+        self.txtModsFolderSteam = QLineEdit(
+            (os.environ["MODS_FOLDER_STEAM"] if "MODS_FOLDER_STEAM" in os.environ else ""), self)
         gridLayout.addWidget(self.txtModsFolderSteam, row, col)
         col += 1
 
@@ -109,7 +113,7 @@ class SettingsWindow(QDialog):
         self.comboProfile.addItems([str(x) for x in range(0, 9)])
         try:
             self.comboProfile.setCurrentIndex(int(os.environ["PROFILE"]))
-        except:
+        except Exception:
             pass
         gridLayout.addWidget(self.comboProfile, row, col)
         col += 1
@@ -140,8 +144,8 @@ class SettingsWindow(QDialog):
 
         self.setLayout(vboxLayout)
 
-    def browseFileExplorerForFolder(self, target, window_name="File Explorer"):
-        def browse():
+    def browseFileExplorerForFolder(self, target: QLabel, window_name: str = "File Explorer") -> Callable[[], None]:
+        def browse() -> None:
             dialog = QFileDialog(self)
             dialog.setFileMode(QFileDialog.DirectoryOnly)
 
@@ -151,18 +155,20 @@ class SettingsWindow(QDialog):
 
         return browse
 
-    def browseFileExplorerForFile(self, target, window_name="File Explorer", file_filter="All Files (*)"):
-        def browse():
+    def browseFileExplorerForFile(self, target: QLabel, window_name: str = "File Explorer",
+                                  file_filter: str = "All Files (*)") -> Callable[[], None]:
+        def browse() -> None:
             dialog = QFileDialog(self)
             dialog.setFileMode(QFileDialog.AnyFile)
 
-            path, _ = dialog.getOpenFileName(self, QObject.tr(self, window_name),  target.text(), QObject.tr(self, file_filter))
+            path, _ = dialog.getOpenFileName(self, QObject.tr(self, window_name), target.text(),
+                                             QObject.tr(self, file_filter))
             if path:
                 target.setText(path)
 
         return browse
 
-    def _onSettingsSave(self):
+    def _onSettingsSave(self) -> None:
         os.environ["SAVE_EDITOR_JAR_PATH"] = self.txtSaveEditorJar.text()
         os.environ["GAME_FOLDER"] = self.txtGameFolder.text()
         os.environ["MODS_FOLDER_STEAM"] = self.txtModsFolderSteam.text()
@@ -179,7 +185,7 @@ class SettingsWindow(QDialog):
 
         self.close()
 
-    def _onSettingsApply(self):
+    def _onSettingsApply(self) -> None:
         os.environ["SAVE_EDITOR_JAR_PATH"] = self.txtSaveEditorJar.text()
         os.environ["GAME_FOLDER"] = self.txtGameFolder.text()
         os.environ["MODS_FOLDER_STEAM"] = self.txtModsFolderSteam.text()
@@ -190,5 +196,5 @@ class SettingsWindow(QDialog):
 
         self.close()
 
-    def _onSettingsClose(self):
+    def _onSettingsClose(self) -> None:
         self.close()

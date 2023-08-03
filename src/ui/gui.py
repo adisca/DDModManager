@@ -18,11 +18,11 @@ class MainWindow(QMainWindow):
         self.setGeometry(300, 200, 1500, 700)
         self.setWindowIcon(QIcon(PLACEHOLDER_IMG))
 
-        self.createMenus()
+        self._createMenus()
         self.modTab = ModTab()
         self.setCentralWidget(self.modTab)
 
-    def createMenus(self):
+    def _createMenus(self) -> None:
         menuBar = self.menuBar()
         settingsMenu = menuBar.addMenu(QIcon(), "Settings")
 
@@ -34,17 +34,17 @@ class MainWindow(QMainWindow):
         preferencesAction.triggered.connect(self.openPreferencesDialog)
         settingsMenu.addAction(preferencesAction)
 
-    def openPathSettingsDialog(self):
+    def openPathSettingsDialog(self) -> None:
         dialog = SettingsWindow()
         dialog.changedSettings.connect(self.modTab.reload)
         dialog.exec_()
 
-    def openPreferencesDialog(self):
+    def openPreferencesDialog(self) -> None:
         dialog = PreferencesWindow()
         dialog.exec_()
 
 
-def run():
+def run() -> None:
     app = QApplication(sys.argv)
 
     # Force the style to be the same on all OSs:

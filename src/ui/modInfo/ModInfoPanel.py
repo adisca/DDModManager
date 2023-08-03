@@ -1,9 +1,11 @@
 from PySide2.QtWidgets import QTabWidget, QScrollArea
+from PySide2.QtCore import QUrl
 
 from ui.modInfo.ModBrowserTab import ModBrowserTab
 from ui.modInfo.ModDescriptionTab import ModDescriptionTab
 from ui.modInfo.ModRequirementsTab import ModRequirementsTab
 from ui.modInfo.ModStatusTab import ModStatusTab
+from logic.Mod import Mod
 
 
 class ModInfoScreen(QTabWidget):
@@ -29,7 +31,7 @@ class ModInfoScreen(QTabWidget):
         self.addTab(self.descTab, "Desc")
         self.addTab(self.browserTab, "Browser")
 
-    def loadMod(self, mod):
+    def loadMod(self, mod: Mod) -> None:
         if not mod:
             print("No mod to load")
             return
@@ -42,6 +44,6 @@ class ModInfoScreen(QTabWidget):
             self.reqTab.loadMod(mod)
             self.descTab.loadMod(mod)
 
-    def redirectToBrowser(self, url):
+    def redirectToBrowser(self, url: QUrl) -> None:
         self.setCurrentWidget(self.browserTab)
         self.browserTab.load(url)

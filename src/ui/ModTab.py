@@ -93,11 +93,11 @@ class ModTab(QWidget):
 
         self.setLayout(everythingLayout)
 
-    def reload(self):
+    def reload(self) -> None:
         ModDB.reload()
         self.refresh()
 
-    def refresh(self):
+    def refresh(self) -> None:
         self.disabledModsWidget.clear()
         self.enabledModsWidget.clear()
 
@@ -107,7 +107,7 @@ class ModTab(QWidget):
             self.enabledModsWidget.add_item(ModItem(mod))
 
     # Might want to change order in ModDB too, otherwise it is changed only in the ui
-    def _handleOrderChange(self, container, moved):
+    def _handleOrderChange(self, container: object, moved: bool) -> None:
         if self.disabledModsWidget == container:
             print(f"Moved to disabled column. {'Changed' if moved else 'Unchanged'} column.")
         elif self.enabledModsWidget == container:
@@ -115,12 +115,12 @@ class ModTab(QWidget):
         else:
             print("Unrecognised column.")
 
-    def _handleItemClicked(self, modItem):
+    def _handleItemClicked(self, modItem: ModItem) -> None:
         print(modItem.mod.toString())
         self.modInfoTab.loadMod(modItem.mod)
 
     # Btn event functions
-    def _startGame(self):
+    def _startGame(self) -> None:
         if "GAME_FOLDER" in os.environ and os.path.exists(f'{os.environ["GAME_FOLDER"]}/_windows/Darkest.exe'):
             print("Starting game")
             os.chdir(os.environ["GAME_FOLDER"])
@@ -128,7 +128,7 @@ class ModTab(QWidget):
             os.chdir(os.environ["APP_PATH"])
             self.window().close()
 
-    def _saveChanges(self):
+    def _saveChanges(self) -> None:
         print("Save changes")
         try:
             dd_stuff.writeModsAndSave(self.enabledModsWidget.getItemsData())
@@ -141,7 +141,7 @@ class ModTab(QWidget):
         except Exception as err:
             QMessageBox(QMessageBox.Icon.Critical, "Error", str(err)).exec_()
 
-    def _exportModlist(self):
+    def _exportModlist(self) -> None:
         print("Export modlist")
         path, _ = QFileDialog.getSaveFileName(self, QObject.tr(self, "File to export"),
                                               f"{MODLISTS_FOLDER}/modlist.csv", QObject.tr(self, "CSV files (*.csv)"))
@@ -151,7 +151,7 @@ class ModTab(QWidget):
 
             QMessageBox(QMessageBox.Icon.NoIcon, "Success", f"Successfully exported modlist to:\n{path}").exec_()
 
-    def _importCsvModlist(self):
+    def _importCsvModlist(self) -> None:
         print("Import modlist")
         path, _ = QFileDialog.getOpenFileName(self, QObject.tr(self, "Modlist to import"), MODLISTS_FOLDER,
                                               QObject.tr(self, "CSV files (*.csv)"))
@@ -162,7 +162,7 @@ class ModTab(QWidget):
 
             QMessageBox(QMessageBox.Icon.NoIcon, "Success", f"Successfully imported modlist from:\n{path}").exec_()
 
-    def _importUrlModlist(self):
+    def _importUrlModlist(self) -> None:
         text, ok = QInputDialog.getText(self, "Import modlist URL", "URL:", QLineEdit.Normal)
         print(text, ok)
         if ok:

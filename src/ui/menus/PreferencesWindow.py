@@ -8,9 +8,9 @@ class PreferencesWindow(QDialog):
         self.setWindowTitle("Preferences settings")
         self.setGeometry(300, 200, 500, 300)
 
-        self.createLayout()
+        self._createLayout()
 
-    def createLayout(self):
+    def _createLayout(self) -> None:
         vboxLayout = QVBoxLayout()
 
         actionsGroup = QGroupBox()
@@ -31,4 +31,3 @@ class PreferencesWindow(QDialog):
 
     def _onSettingsClose(self):
         self.close()
-

@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 class SaveFileManager:
-    def __init__(self, save_editor_jar_path, saves_location, profile_nb):
+    def __init__(self, save_editor_jar_path: str, saves_location: str, profile_nb: str):
         if not profile_nb.isdigit() or int(profile_nb) not in range(0, 9):
             raise ValueError("Invalid profile number")
         else:
@@ -13,14 +13,14 @@ class SaveFileManager:
             self.ProfileNb = profile_nb
             self.SaveProfilePath = Path(saves_location, f"profile_{profile_nb}")
 
-    def swap_profile(self, profile_nb):
+    def swap_profile(self, profile_nb: str) -> None:
         if not profile_nb.isdigit() or int(profile_nb) not in range(0, 9):
             raise ValueError("Invalid profile number")
         else:
             self.ProfileNb = profile_nb
             self.SaveProfilePath = Path(self.SaveProfilePath.parent, f"profile_{profile_nb}")
 
-    def decrypt_save_info(self, outputPath, fileName):
+    def decrypt_save_info(self, outputPath: str, fileName: str) -> None:
         if not os.path.exists(Path(f'{self.SaveProfilePath}/{fileName}')):
             print(f"{fileName} doesn't exist encrypted")
             raise FileNotFoundError
@@ -29,7 +29,7 @@ class SaveFileManager:
                              '-o', outputPath, Path(f'{self.SaveProfilePath}/{fileName}')])
             print(f'decrypted {fileName}!')
 
-    def encrypt_save_info(self, inputPath, fileName):
+    def encrypt_save_info(self, inputPath: str, fileName: str) -> None:
         if not os.path.exists(inputPath):
             print(f"{inputPath} doesn't exist decrypted")
             raise FileNotFoundError

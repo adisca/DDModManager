@@ -2,6 +2,7 @@ from PySide2.QtGui import QPalette, QColor, QFont
 from PySide2.QtWidgets import QWidget, QLabel, QVBoxLayout, QGroupBox
 
 from ui.FlowLayout import FlowLayout
+from logic.Mod import Mod
 
 
 class ModStatusTab(QWidget):
@@ -10,7 +11,7 @@ class ModStatusTab(QWidget):
 
         self._initialize()
 
-    def _initialize(self):
+    def _initialize(self) -> None:
         vbox = QVBoxLayout()
 
         generalBox = QGroupBox("General", self)
@@ -25,7 +26,7 @@ class ModStatusTab(QWidget):
 
         self.setLayout(vbox)
 
-    def loadMod(self, mod):
+    def loadMod(self, mod: Mod) -> None:
         if not mod.metadata:
             print(f"Mod {mod.id} {mod.name} has no metadata to show")
             return

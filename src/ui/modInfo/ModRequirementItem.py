@@ -21,6 +21,9 @@ class ModRequirementItem(QWidget):
     def __init__(self, name: str, fulfilled: ModRequirementStates = ModRequirementStates.Unfulfilled):
         super().__init__()
 
+        self._initialize(name, fulfilled)
+
+    def _initialize(self, name: str, fulfilled: ModRequirementStates) -> None:
         self.setFixedSize(self.SIZE_W, self.SIZE_H)
 
         hbox = QHBoxLayout()

@@ -1,5 +1,9 @@
 from PySide2.QtWidgets import QWidget, QVBoxLayout
 from PySide2.QtCore import Signal, Qt
+from PySide2.QtGui import QDragEnterEvent, QDropEvent
+
+from ui.modManagement import ModItem
+from logic.Mod import Mod
 
 
 class ModDisplayArea(QWidget):
@@ -15,10 +19,10 @@ class ModDisplayArea(QWidget):
         self.blayout.setAlignment(Qt.AlignTop)
         self.setLayout(self.blayout)
 
-    def dragEnterEvent(self, e):
+    def dragEnterEvent(self, e: QDragEnterEvent) -> None:
         e.accept()
 
-    def dropEvent(self, e):
+    def dropEvent(self, e: QDropEvent) -> None:
         pos = e.pos()
         widget = e.source()
 
@@ -45,15 +49,15 @@ class ModDisplayArea(QWidget):
 
         e.accept()
 
-    def add_item(self, item):
+    def add_item(self, item: ModItem) -> None:
         self.blayout.addWidget(item)
         item.clicked.connect(self.itemClicked.emit)
 
-    def clear(self):
+    def clear(self) -> None:
         for i in reversed(range(self.blayout.count())):
             self.blayout.takeAt(i).widget().deleteLater()
 
-    def getItemsData(self):
+    def getItemsData(self) -> list[Mod]:
         data = []
         for i in range(self.blayout.count()):
             w = self.blayout.itemAt(i).widget()

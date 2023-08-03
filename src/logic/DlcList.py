@@ -11,7 +11,7 @@ class DLC:
         self.img = img
 
 
-class _DlcListSingleton:
+class _DlcListSingleton(object):
     DLC_BC = DLC("1117860", "arena_mp", "The Butcher's Circus", HEADER_BC_IMG)
     DLC_MSK = DLC("445700", "musketeer", "The Musketeer", HEADER_MSK_IMG)
     DLC_CC = DLC("580100", "crimson_court", "The Crimson Court", HEADER_CC_IMG)
@@ -20,7 +20,7 @@ class _DlcListSingleton:
 
     DLC_UNKNOWN = DLC("0", "unknown", "Unknown", PLACEHOLDER_IMG)
 
-    list = []
+    list: list[DLC] = []
 
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, 'instance'):

@@ -1,14 +1,15 @@
 import csv
 import os
 import ast
-
-from logic.ModMetadata import ModMetadata
+from typing import Union
 
 from constants.paths import *
+from logic.ModMetadata import ModMetadata
+from logic.Mod import Mod
 
 
-class _MetadataCacheSingleton:
-    cache = []
+class _MetadataCacheSingleton(object):
+    cache: list[ModMetadata] = []
     _hasChanged = False
 
     def __new__(cls, *args, **kwargs):
@@ -16,10 +17,10 @@ class _MetadataCacheSingleton:
             cls.instance = super(_MetadataCacheSingleton, cls).__new__(cls)
         return cls.instance
 
-    def getById(self, meta_id, default=None):
+    def getById(self, meta_id: str, default: type = None) -> Union[str, type]:
         return next((m for m in self.cache if m.id == meta_id), default)
 
-    def loadCache(self):
+    def loadCache(self) -> None:
         self.cache = []
 
         if not os.path.exists(CACHE_PATH):
@@ -31,7 +32,7 @@ class _MetadataCacheSingleton:
                 self.cache.append(self.convertCsvRowToModMetadata(row))
         print("Mod metadata cache loaded")
 
-    def saveCache(self):
+    def saveCache(self) -> None:
         if self._hasChanged:
             with open(CACHE_PATH, "w", newline="", encoding="utf-8") as f:
                 csv_writer = csv.writer(f, delimiter=',')
@@ -40,14 +41,14 @@ class _MetadataCacheSingleton:
             print("Mod metadata cache saved")
             _hasChanged = False
 
-    def addToCache(self, metadatas):
+    def addToCache(self, metadatas: list[ModMetadata]) -> None:
         cacheIds = [m.id for m in self.cache]
         for metadata in metadatas:
             if metadata.id not in cacheIds:
                 self.cache.append(metadata)
                 self._hasChanged = True
 
-    def retrieveModsMetadata(self, mods):
+    def retrieveModsMetadata(self, mods: list[Mod]) -> list[Mod]:
         uncachedMods = []
         for mod in mods:
             meta = next((m for m in self.cache if m.id == mod.id or m.name == mod.name), None)
@@ -58,7 +59,7 @@ class _MetadataCacheSingleton:
         return uncachedMods
 
     @staticmethod
-    def convertCsvRowToModMetadata(row):
+    def convertCsvRowToModMetadata(row) -> ModMetadata:
         return ModMetadata(
             row[0],
             row[1],

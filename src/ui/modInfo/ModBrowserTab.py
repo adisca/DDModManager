@@ -10,7 +10,7 @@ class ModBrowserTab(QWebEngineView):
 
         self._initialize()
 
-    def _initialize(self):
+    def _initialize(self) -> None:
         self.setPage(SteamOnlyPage(self))
         self.load(QUrl("https://steamcommunity.com/app/262060/workshop/"))
 

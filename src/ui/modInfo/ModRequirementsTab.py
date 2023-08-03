@@ -8,12 +8,12 @@ from ui.modInfo.ModRequirementItem import ModRequirementItem
 
 
 class ModRequirementsTab(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent: QWidget = None):
         super().__init__(parent)
 
         self._initialize()
 
-    def _initialize(self):
+    def _initialize(self) -> None:
         vbox = QVBoxLayout()
 
         widgetRequiredDLC = QGroupBox("Required DLC", self)

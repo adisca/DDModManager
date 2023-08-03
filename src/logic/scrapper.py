@@ -1,3 +1,5 @@
+from typing import Union
+
 from bs4 import BeautifulSoup
 import requests
 import re
@@ -21,7 +23,7 @@ STEAM_CSS_TAGS = '''<link href="https://community.cloudflare.steamstatic.com/pub
 <link href="https://community.cloudflare.steamstatic.com/public/css/skin_1/header.css?v=vh4BMeDcNiCU&amp;l=romanian&amp;_cdn=cloudflare" rel="stylesheet" type="text/css" >'''
 
 
-def get_mods_from_collection(url):
+def get_mods_from_collection(url: str) -> list[str]:
     print(f"Get mods from collection: {url}")
 
     mod_ids = []
@@ -43,7 +45,7 @@ def get_mods_from_collection(url):
     return mod_ids
 
 
-def get_mod_info(url):
+def get_mod_info(url: str) -> (str, str, list[str], list[str], list[str], list[str]):
     print(f"Getting mod info from: {url}")
 
     page = requests.get(url)
@@ -51,7 +53,11 @@ def get_mod_info(url):
         raise Exception
 
     bs = BeautifulSoup(page.content, "html.parser")
-    # print(bs.prettify())
+
+    _id = "0"
+    url_numbers = re.findall(r"\d+", url)
+    if url_numbers:
+        _id = url_numbers[0]
 
     title = bs.find(class_="workshopItemTitle")
     if not title:
@@ -81,34 +87,28 @@ def get_mod_info(url):
     for author in bs.find_all(class_="friendBlockContent"):
         authors.append(re.findall(r"\r\n\t\t\t\t(.*?)\n\r\n\t\t", author.text)[0])
 
-    return re.findall(r"\d+", url)[0], title.text, tags, authors, required_dlcs, required_mods
+    return _id, title.text, tags, authors, required_dlcs, required_mods
 
 
-def get_mod_info_by_id(mod_id):
+def get_mod_info_by_id(mod_id: str) -> (str, str, list[str], list[str], list[str], list[str]):
     return get_mod_info(util.mod_page_url(mod_id))
 
 
-def create_empty_html():
+def create_empty_html() -> BeautifulSoup:
     return BeautifulSoup("<!DOCTYPE html><html><head></head><body></body></html>", "html.parser")
 
 
-def add_tags_to_head(doc, tags):
+def add_tags_to_head(doc: BeautifulSoup, tags: Union[BeautifulSoup, list[BeautifulSoup]]) -> BeautifulSoup:
     for tag in tags:
         doc.find("head").append(tag)
     return doc
 
 
-def add_tags_to_body(doc, tags):
+def add_tags_to_body(doc: BeautifulSoup, tags: Union[BeautifulSoup, list[BeautifulSoup]]) -> BeautifulSoup:
     for tag in tags:
         doc.find("body").append(tag)
     return doc
 
 
-def add_steam_css(doc):
+def add_steam_css(doc: BeautifulSoup) -> BeautifulSoup:
     return add_tags_to_head(doc, BeautifulSoup(STEAM_CSS_TAGS, "html.parser"))
-
-
-def convert_html_square_to_angle_brackets(html_content):
-    # Replace square brackets with angle brackets using regular expressions
-    xml_content_with_angle_brackets = re.sub(r'\[\/?(.*?)\]', r'<\1>', html_content)
-    return xml_content_with_angle_brackets

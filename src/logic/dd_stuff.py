@@ -14,7 +14,7 @@ from logic.ModMetadata import ModMetadata
 from constants.paths import *
 
 
-def get_mods_from_folder(mod_dir_path, source=ModSources.Local):
+def get_mods_from_folder(mod_dir_path: str, source: ModSources = ModSources.Local) -> list[Mod]:
     mods = []
     for dir_name in next(os.walk(mod_dir_path))[1]:
         dir_path = os.path.join(mod_dir_path, dir_name)
@@ -82,38 +82,23 @@ def get_mods_from_folder(mod_dir_path, source=ModSources.Local):
     return mods
 
 
-def get_enabled_mods_data(json_data):
-    mods = []
+def get_enabled_mods_data(json_data: dict) -> list[(str, str)]:
+    mods_data = []
 
     if "applied_ugcs_1_0" in json_data["base_root"]:
         for entry in json_data["base_root"]["applied_ugcs_1_0"]:
-            mods.append(
+            mods_data.append(
                 (
                     json_data["base_root"]["applied_ugcs_1_0"][entry]["name"],
                     json_data["base_root"]["applied_ugcs_1_0"][entry]["source"]
                 )
             )
 
-    return mods
-
-
-def get_mods_names(mod_dir_path):
-    mods = []
-    for dir_name in next(os.walk(mod_dir_path))[1]:
-        dir_path = os.path.join(mod_dir_path, dir_name)
-        for file in next(os.walk(dir_path))[2]:
-            if file == "project.xml":
-                file_path = os.path.join(dir_path, file)
-                with open(file_path, "r", encoding="utf8") as f:
-                    file_contents = f.read()
-                bs_data = BeautifulSoup(file_contents, "xml")
-                mods.append(bs_data.find("Title").text)
-                break
-    return mods
+    return mods_data
 
 
 # ignores duplicate ids, the first is written
-def exportModlist(path, mods):
+def exportModlist(path: str, mods: list[Mod]) -> None:
     exportedList = []
     with open(path, "w", newline="", encoding="utf-8") as f:
         csv_writer = csv.writer(f, delimiter=',')
@@ -125,15 +110,15 @@ def exportModlist(path, mods):
                 print(f"Duplicate or not installed in export: {mod.id}")
 
 
-def importCsvModlist(modlist_path, installed_mods):
+def importCsvModlist(modlist_path: str, installed_mods: list[Mod]):
     return importModlist(read_modlist_csv(modlist_path), installed_mods)
 
 
-def importURLModlist(modlist_url, installed_mods):
+def importURLModlist(modlist_url: str, installed_mods: list[Mod]):
     return importModlist(scrapper.get_mods_from_collection(modlist_url), installed_mods)
 
 
-def importModlist(modlist_ids, installed_mods):
+def importModlist(modlist_ids: list[str], installed_mods: list[Mod]) -> (list[Mod], list[Mod], list[Mod], list[Mod]):
     new_installed_mods = installed_mods.copy()
     uninstalled_mods = []
     disabled_mods = installed_mods.copy()
@@ -158,7 +143,7 @@ def importModlist(modlist_ids, installed_mods):
 
 
 # ignores duplicate ids, the first is taken
-def read_modlist_csv(modlist_path):
+def read_modlist_csv(modlist_path: str) -> list[str]:
     res = []
     with open(modlist_path, "r", encoding="utf-8") as f:
         csv_reader = csv.reader(f)
@@ -171,7 +156,7 @@ def read_modlist_csv(modlist_path):
     return res
 
 
-def convert_mod_list_to_json_mods(mods):
+def convert_mod_list_to_json_mods(mods: list[Mod]) -> dict[str, dict[str, str]]:
     res = {}
     for i, mod in enumerate(mods):
         if mod.installed:
@@ -179,7 +164,7 @@ def convert_mod_list_to_json_mods(mods):
     return res
 
 
-def writeModsToGameFile(decryptedGameFile, mods):
+def writeModsToGameFile(decryptedGameFile: str, mods: list[Mod]) -> None:
     with open(decryptedGameFile, "r", encoding="utf-8") as f:
         json_data = json.load(f)
         json_data["base_root"]["applied_ugcs_1_0"] = convert_mod_list_to_json_mods(mods)
@@ -189,13 +174,13 @@ def writeModsToGameFile(decryptedGameFile, mods):
         json.dump(json_data, f, indent=4)
 
 
-def writeModsAndSave(mods):
+def writeModsAndSave(mods: list[Mod]) -> None:
     sfm = SaveFileManager(os.environ["SAVE_EDITOR_JAR_PATH"], os.environ["SAVES_FOLDER"], os.environ["PROFILE"])
     writeModsToGameFile(TARGET_JSON, mods)
     sfm.encrypt_save_info(TARGET_JSON, GAME_FILE_NAME)
 
 
-def getCategorisedMods():
+def getCategorisedMods() -> (list[Mod], list[Mod], list[Mod], list[Mod]):
     installed_mods = []
 
     if "GAME_FOLDER" in os.environ and os.path.exists(os.environ["GAME_FOLDER"]):
@@ -240,7 +225,7 @@ def getCategorisedMods():
                             is_installed = True
                             break
                 if not is_installed:
-                    deleted_mod = Mod(0, mod_name, mod_source, installed=False)
+                    deleted_mod = Mod("0", mod_name, mod_source, installed=False)
                     enabled_mods.append(deleted_mod)
                     uninstalled_mods.append(deleted_mod)
         except Exception as err:
@@ -255,7 +240,7 @@ def getCategorisedMods():
     return installed_mods, uninstalled_mods, disabled_mods, enabled_mods
 
 
-def getFromCache(installed_mods, uninstalled_mods):
+def getFromCache(installed_mods: list[Mod], uninstalled_mods: list[Mod]) -> None:
     for uncached_mod in metadataCache.retrieveModsMetadata(installed_mods):
         uncached_mod.setMetadata(ModMetadata(*scrapper.get_mod_info_by_id(uncached_mod.id)))
         metadataCache.addToCache([uncached_mod.metadata])
@@ -264,4 +249,3 @@ def getFromCache(installed_mods, uninstalled_mods):
             uncached_mod.setMetadata(ModMetadata(*scrapper.get_mod_info_by_id(uncached_mod.id)))
             metadataCache.addToCache([uncached_mod.metadata])
     metadataCache.saveCache()
-

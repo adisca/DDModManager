@@ -1,6 +1,6 @@
-
 class ModMetadata:
-    def __init__(self, mod_id, name, tags, authors=None, req_dlc=None, req_mods=None):
+    def __init__(self, mod_id: str, name: str, tags: list[str], authors: list[str] = None, req_dlc: list[str] = None,
+                 req_mods: list[str] = None):
         if authors is None:
             authors = []
         if req_mods is None:
@@ -15,5 +15,5 @@ class ModMetadata:
         self.req_dlc = req_dlc
         self.req_mods = req_mods
 
-    def toList(self):
+    def toList(self) -> list:
         return [self.id, self.name, self.tags, self.authors, self.req_dlc, self.req_mods]

@@ -1,8 +1,9 @@
 from PySide2.QtCore import Qt, QMimeData, Signal
-from PySide2.QtGui import QDrag, QPixmap, QPalette, QColor, QFont, QFontMetrics
+from PySide2.QtGui import QDrag, QPixmap, QPalette, QColor, QFont, QFontMetrics, QMouseEvent
 from PySide2.QtWidgets import QWidget, QHBoxLayout, QLabel
 
 from constants.pathsImgs import *
+from logic.Mod import Mod
 
 
 class ModItem(QWidget):
@@ -14,13 +15,13 @@ class ModItem(QWidget):
 
     clicked = Signal(object)
 
-    def __init__(self, mod):
+    def __init__(self, mod: Mod):
         super().__init__()
         self.mod = mod
 
         self._initialize()
 
-    def _initialize(self):
+    def _initialize(self) -> None:
         self.setFixedSize(self.SIZE_W, self.SIZE_H)
         self.setToolTip(f"ID: {self.mod.id}\nSource: {self.mod.source}\nActive: {self.mod.active}")
 
@@ -53,7 +54,7 @@ class ModItem(QWidget):
 
         self.refreshBackgroundColor()
 
-    def refreshBackgroundColor(self):
+    def refreshBackgroundColor(self) -> None:
         palette = self.palette()
 
         if not self.mod.installed:
@@ -68,12 +69,12 @@ class ModItem(QWidget):
         self.setPalette(palette)
         self.setAutoFillBackground(True)
 
-    def mouseReleaseEvent(self, e):
+    def mouseReleaseEvent(self, e: QMouseEvent) -> None:
         print("Click ", end="")
         print(self.mod.toString())
         self.clicked.emit(self)
 
-    def mouseMoveEvent(self, e):
+    def mouseMoveEvent(self, e: QMouseEvent) -> None:
         if e.buttons() == Qt.LeftButton:
             drag = QDrag(self)
             mime = QMimeData()
@@ -85,5 +86,5 @@ class ModItem(QWidget):
 
             drag.exec_(Qt.MoveAction)
 
-    def getData(self):
+    def getData(self) -> Mod:
         return self.mod

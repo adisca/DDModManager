@@ -1,5 +1,6 @@
+from typing import Optional
 
-IMG_SIZE = (50, 50)
+from logic.ModMetadata import ModMetadata
 
 
 class ModSources:
@@ -9,7 +10,9 @@ class ModSources:
 
 
 class Mod:
-    def __init__(self, mod_id, mod_name, source, mod_img=None, desc="", tags=None, active=False, installed=True, metadata=None):
+    def __init__(self, mod_id: str, mod_name: str, source: ModSources, mod_img: Optional[str] = None, desc: str = "",
+                 tags: list[str] = None, active: bool = False, installed: bool = True,
+                 metadata: Optional[ModMetadata] = None):
         if tags is None:
             tags = []
 
@@ -23,9 +26,9 @@ class Mod:
         self.installed = installed
         self.metadata = metadata
 
-    def setMetadata(self, metadata):
+    def setMetadata(self, metadata: ModMetadata) -> None:
         self.metadata = metadata
         self.name = metadata.name
 
-    def toString(self):
+    def toString(self) -> str:
         return f"{self.id} {self.name}"
