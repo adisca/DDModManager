@@ -1,7 +1,7 @@
 import csv
 import os
 import ast
-from typing import Union
+from typing import Union, List
 
 from constants.paths import *
 from logic.ModMetadata import ModMetadata
@@ -9,7 +9,7 @@ from logic.Mod import Mod
 
 
 class _MetadataCacheSingleton(object):
-    cache: list[ModMetadata] = []
+    cache: List[ModMetadata] = []
     _hasChanged = False
 
     def __new__(cls, *args, **kwargs):
@@ -41,14 +41,14 @@ class _MetadataCacheSingleton(object):
             print("Mod metadata cache saved")
             _hasChanged = False
 
-    def addToCache(self, metadatas: list[ModMetadata]) -> None:
+    def addToCache(self, metadatas: List[ModMetadata]) -> None:
         cacheIds = [m.id for m in self.cache]
         for metadata in metadatas:
             if metadata.id not in cacheIds:
                 self.cache.append(metadata)
                 self._hasChanged = True
 
-    def retrieveModsMetadata(self, mods: list[Mod]) -> list[Mod]:
+    def retrieveModsMetadata(self, mods: List[Mod]) -> List[Mod]:
         uncachedMods = []
         for mod in mods:
             meta = next((m for m in self.cache if m.id == mod.id or m.name == mod.name), None)

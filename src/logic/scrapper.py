@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, List
 
 from bs4 import BeautifulSoup
 import requests
@@ -23,7 +23,7 @@ STEAM_CSS_TAGS = '''<link href="https://community.cloudflare.steamstatic.com/pub
 <link href="https://community.cloudflare.steamstatic.com/public/css/skin_1/header.css?v=vh4BMeDcNiCU&amp;l=romanian&amp;_cdn=cloudflare" rel="stylesheet" type="text/css" >'''
 
 
-def get_mods_from_collection(url: str) -> list[str]:
+def get_mods_from_collection(url: str) -> List[str]:
     print(f"Get mods from collection: {url}")
 
     mod_ids = []
@@ -45,7 +45,7 @@ def get_mods_from_collection(url: str) -> list[str]:
     return mod_ids
 
 
-def get_mod_info(url: str) -> (str, str, list[str], list[str], list[str], list[str]):
+def get_mod_info(url: str) -> (str, str, List[str], List[str], List[str], List[str]):
     print(f"Getting mod info from: {url}")
 
     page = requests.get(url)
@@ -90,7 +90,7 @@ def get_mod_info(url: str) -> (str, str, list[str], list[str], list[str], list[s
     return _id, title.text, tags, authors, required_dlcs, required_mods
 
 
-def get_mod_info_by_id(mod_id: str) -> (str, str, list[str], list[str], list[str], list[str]):
+def get_mod_info_by_id(mod_id: str) -> (str, str, List[str], List[str], List[str], List[str]):
     return get_mod_info(util.mod_page_url(mod_id))
 
 
@@ -98,13 +98,13 @@ def create_empty_html() -> BeautifulSoup:
     return BeautifulSoup("<!DOCTYPE html><html><head></head><body></body></html>", "html.parser")
 
 
-def add_tags_to_head(doc: BeautifulSoup, tags: Union[BeautifulSoup, list[BeautifulSoup]]) -> BeautifulSoup:
+def add_tags_to_head(doc: BeautifulSoup, tags: Union[BeautifulSoup, List[BeautifulSoup]]) -> BeautifulSoup:
     for tag in tags:
         doc.find("head").append(tag)
     return doc
 
 
-def add_tags_to_body(doc: BeautifulSoup, tags: Union[BeautifulSoup, list[BeautifulSoup]]) -> BeautifulSoup:
+def add_tags_to_body(doc: BeautifulSoup, tags: Union[BeautifulSoup, List[BeautifulSoup]]) -> BeautifulSoup:
     for tag in tags:
         doc.find("body").append(tag)
     return doc

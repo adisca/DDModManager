@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, List
 
 from constants.pathsImgs import *
 
@@ -20,7 +20,7 @@ class _DlcListSingleton(object):
 
     DLC_UNKNOWN = DLC("0", "unknown", "Unknown", PLACEHOLDER_IMG)
 
-    list: list[DLC] = []
+    list: List[DLC] = []
 
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, 'instance'):

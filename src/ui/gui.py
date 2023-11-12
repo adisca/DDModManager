@@ -1,13 +1,13 @@
 import sys
 
-from PySide2.QtGui import QIcon, QColor, QPalette
+from PySide2.QtGui import QIcon
 from PySide2.QtWidgets import QApplication, QMainWindow, QAction
-from PySide2.QtCore import Qt
 
-from ui.ModTab import ModTab
-from ui.menus.SettingsWindow import SettingsWindow
-from ui.menus.PreferencesWindow import PreferencesWindow
+from ui.visuals.DarkPalette import DarkPalette
 from constants.pathsImgs import *
+from ui.ModTab import ModTab
+from ui.menus.PreferencesWindow import PreferencesWindow
+from ui.menus.SettingsWindow import SettingsWindow
 
 
 class MainWindow(QMainWindow):
@@ -51,21 +51,7 @@ def run() -> None:
     app.setStyle("Fusion")
 
     # Now use a palette to switch to dark colors:
-    palette = QPalette()
-    palette.setColor(QPalette.Window, QColor(53, 53, 53))
-    palette.setColor(QPalette.WindowText, Qt.white)
-    palette.setColor(QPalette.Base, QColor(25, 25, 25))
-    palette.setColor(QPalette.AlternateBase, QColor(53, 53, 53))
-    palette.setColor(QPalette.ToolTipBase, Qt.black)
-    palette.setColor(QPalette.ToolTipText, Qt.white)
-    palette.setColor(QPalette.Text, Qt.white)
-    palette.setColor(QPalette.Button, QColor(53, 53, 53))
-    palette.setColor(QPalette.ButtonText, Qt.white)
-    palette.setColor(QPalette.BrightText, Qt.red)
-    palette.setColor(QPalette.Link, QColor(42, 130, 218))
-    palette.setColor(QPalette.Highlight, QColor(42, 130, 218))
-    palette.setColor(QPalette.HighlightedText, Qt.black)
-    app.setPalette(palette)
+    app.setPalette(DarkPalette())
 
     window = MainWindow()
     window.show()

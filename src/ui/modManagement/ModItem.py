@@ -1,6 +1,6 @@
 from PySide2.QtCore import Qt, QMimeData, Signal
 from PySide2.QtGui import QDrag, QPixmap, QPalette, QColor, QFont, QFontMetrics, QMouseEvent
-from PySide2.QtWidgets import QWidget, QHBoxLayout, QLabel
+from PySide2.QtWidgets import QWidget, QHBoxLayout, QLabel, QGraphicsOpacityEffect
 
 from constants.pathsImgs import *
 from logic.Mod import Mod
@@ -18,6 +18,8 @@ class ModItem(QWidget):
     def __init__(self, mod: Mod):
         super().__init__()
         self.mod = mod
+
+        self.filtered = False
 
         self._initialize()
 
@@ -88,3 +90,12 @@ class ModItem(QWidget):
 
     def getData(self) -> Mod:
         return self.mod
+
+    def setFiltered(self, filtered) -> None:
+        self.filtered = filtered
+        if filtered:
+            opacity_effect = QGraphicsOpacityEffect(self)
+            opacity_effect.setOpacity(0.5)
+            self.setGraphicsEffect(opacity_effect)
+        else:
+            self.setGraphicsEffect(None)

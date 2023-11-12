@@ -1,9 +1,12 @@
 from PySide2.QtWidgets import QWidget, QVBoxLayout
 from PySide2.QtCore import Signal, Qt
 from PySide2.QtGui import QDragEnterEvent, QDropEvent
+from typing import List, Callable, Any
 
-from ui.modManagement import ModItem
+from ui.modManagement.ModItem import ModItem
 from logic.Mod import Mod
+
+import re
 
 
 class ModDisplayArea(QWidget):
@@ -27,9 +30,7 @@ class ModDisplayArea(QWidget):
         widget = e.source()
 
         compensate = 0
-        moved = False
-        if widget.parent() != self:
-            moved = True
+        moved = widget.parent() != self
         for n in range(self.blayout.count()):
             w = self.blayout.itemAt(n).widget()
 
@@ -41,11 +42,11 @@ class ModDisplayArea(QWidget):
 
             if drop_here:
                 self.blayout.insertWidget(n, widget)
-                self.orderChanged.emit(widget.parent(), moved)
+                self.orderChanged.emit(widget, moved)
                 break
         else:
             self.blayout.insertWidget(self.blayout.count(), widget)
-            self.orderChanged.emit(widget.parent(), moved)
+            self.orderChanged.emit(widget, moved)
 
         e.accept()
 
@@ -55,11 +56,25 @@ class ModDisplayArea(QWidget):
 
     def clear(self) -> None:
         for i in reversed(range(self.blayout.count())):
-            self.blayout.takeAt(i).widget().deleteLater()
+            self.blayout.removeWidget(self.blayout.takeAt(i).widget())
 
-    def getItemsData(self) -> list[Mod]:
+    def getItemsData(self) -> List[Mod]:
         data = []
         for i in range(self.blayout.count()):
             w = self.blayout.itemAt(i).widget()
             data.append(w.getData())
         return data
+
+    def getWidgets(self) -> List[ModItem]:
+        widgets = []
+        for i in range(self.blayout.count()):
+            widgets.append(self.blayout.itemAt(i).widget())
+        return widgets
+
+    def sort(self, sort_key: Callable[[ModItem], Any], reverse: bool = False) -> None:
+        widgets = self.getWidgets()
+        widgets.sort(key=sort_key, reverse=reverse)
+
+        self.clear()
+        for widget in widgets:
+            self.blayout.addWidget(widget)

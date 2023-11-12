@@ -1,6 +1,9 @@
+from typing import List
+
+
 class ModMetadata:
-    def __init__(self, mod_id: str, name: str, tags: list[str], authors: list[str] = None, req_dlc: list[str] = None,
-                 req_mods: list[str] = None):
+    def __init__(self, mod_id: str, name: str, tags: List[str], authors: List[str] = None, req_dlc: List[str] = None,
+                 req_mods: List[str] = None):
         if authors is None:
             authors = []
         if req_mods is None:
