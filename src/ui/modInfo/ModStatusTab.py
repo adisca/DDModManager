@@ -43,6 +43,7 @@ class ModStatusTab(QWidget):
             self.flowTags.takeAt(i).widget().deleteLater()
         for tag in mod.metadata.tags:
             self.flowTags.addWidget(TagBubble(tag))
+        self.flowTags.refresh()
 
 
 class TagBubble(QLabel):
@@ -58,3 +59,4 @@ class TagBubble(QLabel):
         palette.setColor(QPalette.Window, QColor(140, 140, 140))
         self.setPalette(palette)
         self.setAutoFillBackground(True)
+        self.adjustSize()

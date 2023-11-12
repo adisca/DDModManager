@@ -106,3 +106,6 @@ class FlowLayout(QtWidgets.QLayout):
             return parent.style().pixelMetric(pm, None, parent)
         else:
             return parent.spacing()
+
+    def refresh(self) -> None:
+        self.doLayout(self.geometry(), False)
