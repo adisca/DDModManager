@@ -5,6 +5,7 @@ import requests
 import re
 
 import logic.util as util
+from shared.logger import logger
 
 
 STEAM_CSS_TAGS = '''<link href="https://community.cloudflare.steamstatic.com/public/shared/css/motiva_sans.css?v=GfSjbGKcNYaQ&amp;l=romanian&amp;_cdn=cloudflare" rel="stylesheet" type="text/css" >
@@ -24,7 +25,7 @@ STEAM_CSS_TAGS = '''<link href="https://community.cloudflare.steamstatic.com/pub
 
 
 def get_mods_from_collection(url: str) -> List[str]:
-    print(f"Get mods from collection: {url}")
+    logger.debug(f"Get mods from collection: {url}")
 
     mod_ids = []
 
@@ -40,13 +41,13 @@ def get_mods_from_collection(url: str) -> List[str]:
     for result in results:
         mod_ids.append(result.get("id").replace("sharedfile_", ""))
 
-    print(f"Mods extracted from collection, {len(mod_ids)} mods were found")
+    logger.info(f"Mods extracted from collection, {len(mod_ids)} mods were found")
 
     return mod_ids
 
 
 def get_mod_info(url: str) -> (str, str, List[str], List[str], List[str], List[str]):
-    print(f"Getting mod info from: {url}")
+    logger.info(f"Getting mod info from: {url}")
 
     page = requests.get(url)
     if not page:
@@ -61,7 +62,7 @@ def get_mod_info(url: str) -> (str, str, List[str], List[str], List[str], List[s
 
     title = bs.find(class_="workshopItemTitle")
     if not title:
-        raise Exception
+        return
 
     # description = bs.find(class_="workshopItemDescription")
     # description = add_tags_to_body(add_steam_css(create_empty_html()), [description])
@@ -85,7 +86,7 @@ def get_mod_info(url: str) -> (str, str, List[str], List[str], List[str], List[s
 
     authors = []
     for author in bs.find_all(class_="friendBlockContent"):
-        authors.append(re.findall(r"\r\n\t\t\t\t(.*?)\n\r\n\t\t", author.text)[0])
+        authors.append(author.contents[0].strip())
 
     return _id, title.text, tags, authors, required_dlcs, required_mods
 

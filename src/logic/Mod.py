@@ -29,6 +29,7 @@ class Mod:
     def setMetadata(self, metadata: ModMetadata) -> None:
         self.metadata = metadata
         self.name = metadata.name
+        self.tags = metadata.tags
 
     def toString(self) -> str:
         return f"{self.id} {self.name}"

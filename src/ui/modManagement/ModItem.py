@@ -4,6 +4,7 @@ from PySide2.QtWidgets import QWidget, QHBoxLayout, QLabel, QGraphicsOpacityEffe
 
 from constants.pathsImgs import *
 from logic.Mod import Mod
+from shared.logger import logger
 
 
 class ModItem(QWidget):
@@ -72,8 +73,7 @@ class ModItem(QWidget):
         self.setAutoFillBackground(True)
 
     def mouseReleaseEvent(self, e: QMouseEvent) -> None:
-        print("Click ", end="")
-        print(self.mod.toString())
+        logger.debug(f"Click {self.mod.toString()}")
         self.clicked.emit(self)
 
     def mouseMoveEvent(self, e: QMouseEvent) -> None:

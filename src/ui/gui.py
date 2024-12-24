@@ -8,6 +8,8 @@ from constants.pathsImgs import *
 from ui.ModTab import ModTab
 from ui.menus.PreferencesWindow import PreferencesWindow
 from ui.menus.SettingsWindow import SettingsWindow
+from ui.dlcManagement.DlcWindow import DlcWindow
+from src.shared.signals import signal_manager
 
 
 class MainWindow(QMainWindow):
@@ -34,13 +36,21 @@ class MainWindow(QMainWindow):
         preferencesAction.triggered.connect(self.openPreferencesDialog)
         settingsMenu.addAction(preferencesAction)
 
+        dlcAction = QAction(QIcon(), "DLC", self)
+        dlcAction.triggered.connect(self.openDlcDialog)
+        menuBar.addAction(dlcAction)
+
     def openPathSettingsDialog(self) -> None:
         dialog = SettingsWindow()
-        dialog.changedSettings.connect(self.modTab.reload)
+        signal_manager.s_changed_settings.connect(self.modTab.reload)
         dialog.exec_()
 
     def openPreferencesDialog(self) -> None:
         dialog = PreferencesWindow()
+        dialog.exec_()
+
+    def openDlcDialog(self) -> None:
+        dialog = DlcWindow()
         dialog.exec_()
 
 
@@ -55,5 +65,7 @@ def run() -> None:
 
     window = MainWindow()
     window.show()
+
+    window.modTab.reload()
 
     sys.exit(app.exec_())

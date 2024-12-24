@@ -6,11 +6,9 @@ from typing import List, Callable, Any
 from ui.modManagement.ModItem import ModItem
 from logic.Mod import Mod
 
-import re
-
 
 class ModDisplayArea(QWidget):
-    orderChanged = Signal((object, bool))
+    orderChanged = Signal((object, int, bool))
     itemClicked = Signal(object)
 
     def __init__(self):
@@ -31,8 +29,9 @@ class ModDisplayArea(QWidget):
 
         compensate = 0
         moved = widget.parent() != self
-        for n in range(self.blayout.count()):
-            w = self.blayout.itemAt(n).widget()
+        widgets_count = self.blayout.count()
+        for index in range(widgets_count):
+            w = self.blayout.itemAt(index).widget()
 
             # If this is inside we want to "compensate" by ignoring the next gap and offsetting the sweet spot
             if w == widget:
@@ -41,12 +40,12 @@ class ModDisplayArea(QWidget):
             drop_here = pos.y() < w.y() + w.size().height() // 2 + compensate
 
             if drop_here:
-                self.blayout.insertWidget(n, widget)
-                self.orderChanged.emit(widget, moved)
+                self.blayout.insertWidget(index, widget)
+                self.orderChanged.emit(widget, index, moved)
                 break
         else:
-            self.blayout.insertWidget(self.blayout.count(), widget)
-            self.orderChanged.emit(widget, moved)
+            self.blayout.insertWidget(widgets_count, widget)
+            self.orderChanged.emit(widget, widgets_count, moved)
 
         e.accept()
 

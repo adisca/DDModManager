@@ -6,6 +6,7 @@ from typing import Union, List
 from constants.paths import *
 from logic.ModMetadata import ModMetadata
 from logic.Mod import Mod
+from shared.logger import logger
 
 
 class _MetadataCacheSingleton(object):
@@ -29,8 +30,9 @@ class _MetadataCacheSingleton(object):
         with open(CACHE_PATH, "r", encoding="utf-8") as f:
             csv_reader = csv.reader(f)
             for row in csv_reader:
-                self.cache.append(self.convertCsvRowToModMetadata(row))
-        print("Mod metadata cache loaded")
+                if len(row):
+                    self.cache.append(self.convertCsvRowToModMetadata(row))
+        logger.info("Mod metadata cache loaded")
 
     def saveCache(self) -> None:
         if self._hasChanged:
@@ -38,7 +40,7 @@ class _MetadataCacheSingleton(object):
                 csv_writer = csv.writer(f, delimiter=',')
                 for metadata in self.cache:
                     csv_writer.writerow(metadata.toList())
-            print("Mod metadata cache saved")
+            logger.info("Mod metadata cache saved")
             _hasChanged = False
 
     def addToCache(self, metadatas: List[ModMetadata]) -> None:

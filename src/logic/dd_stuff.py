@@ -12,7 +12,10 @@ import logic.util as util
 from logic.CacheModMetadata import metadataCache
 import logic.scrapper as scrapper
 from logic.ModMetadata import ModMetadata
+from logic.DlcDB import DLC, SubDLC, DlcList, SubDlcList
 from constants.paths import *
+from shared.logger import logger
+from shared.signals import signal_manager
 
 
 def get_mods_from_folder(mod_dir_path: str, source: ModSources = ModSources.Local) -> List[Mod]:
@@ -30,7 +33,7 @@ def get_mods_from_folder(mod_dir_path: str, source: ModSources = ModSources.Loca
                     mod_id = bs_data.find("PublishedFileId").text
                     mod_name = bs_data.find("Title").text
                 except Exception:
-                    print(
+                    logger.error(
                         f"Mod id or name could not be read from fields PublishedFileId, Title respectively. Path: {dir_path}")
                     traceback.print_exc()
                     continue
@@ -53,23 +56,23 @@ def get_mods_from_folder(mod_dir_path: str, source: ModSources = ModSources.Loca
                     mod_tags_xml = mod_tag_group_xml.find_all("Tags")
 
                     if not len(mod_tags_xml):
-                        print(f"Mod {mod_id} {mod_name} has a tag container but no tags")
+                        logger.debug(f"Mod {mod_id} {mod_name} has a tag container but no tags")
                     else:
                         for tag_xml in mod_tags_xml:
                             if tag_xml.text:
                                 mod_tags.append(tag_xml.text.title())
                             else:
-                                print(f"Mod {mod_id} {mod_name} has an empty tag")
+                                logger.debug(f"Mod {mod_id} {mod_name} has an empty tag")
                 else:
-                    print(f"Mod {mod_id} {mod_name} has no tags")
+                    logger.debug(f"Mod {mod_id} {mod_name} has no tags")
 
                 ok = True
                 if source == ModSources.Local and mod_name in [x.name for x in mods]:
                     ok = False
-                    print(f"Duplicate name for local mod: {mod_id} {mod_name}")
+                    logger.debug(f"Duplicate name for local mod: {mod_id} {mod_name}")
                 elif source == ModSources.Steam and mod_id in [x.id for x in mods]:
                     ok = False
-                    print(f"Duplicate id for steam mod: {mod_id} {mod_name}")
+                    logger.debug(f"Duplicate id for steam mod: {mod_id} {mod_name}")
 
                 if ok:
                     mods.append(Mod(
@@ -109,7 +112,7 @@ def exportModlist(path: str, mods: List[Mod]) -> None:
                 csv_writer.writerow([mod.id])
                 exportedList.append(mod.id)
             else:
-                print(f"Duplicate or not installed in export: {mod.id}")
+                logger.debug(f"Duplicate or not installed in export: {mod.id}")
 
 
 def importCsvModlist(modlist_path: str, installed_mods: List[Mod]):
@@ -153,7 +156,7 @@ def read_modlist_csv(modlist_path: str) -> List[str]:
             if row[0].isdigit() and row[0] not in res:
                 res.append(row[0])
             else:
-                print(f"Duplicate or bad id mod in import: {row[0]}")
+                logger.debug(f"Duplicate or bad id mod in import: {row[0]}")
         f.close()
     return res
 
@@ -182,9 +185,61 @@ def writeModsAndSave(mods: List[Mod]) -> None:
     sfm.encrypt_save_info(TARGET_JSON, GAME_FILE_NAME)
 
 
+def convert_dlc_list_to_json_dlcs(dlcs: List[SubDLC]) -> dict[str, dict[str, str]]:
+    res = {}
+    for i, dlc in enumerate(dlcs):
+        res[f"{i}"] = {"name": dlc.name, "source": "dlc"}
+    return res
+
+
+def writeDlcToGameFile(decryptedGameFile: str, dlcs: List[SubDLC]) -> None:
+    with open(decryptedGameFile, "r", encoding="utf-8") as f:
+        json_data = json.load(f)
+        json_data["base_root"]["dlc"] = convert_dlc_list_to_json_dlcs(dlcs)
+
+    with open(decryptedGameFile, "w", encoding="utf-8") as f:
+        json.dump(json_data, f, indent=4)
+
+
+def writeDlcAndSave(dlcs: List[SubDLC]) -> None:
+    sfm = SaveFileManager(os.environ["SAVE_EDITOR_JAR_PATH"], os.environ["SAVES_FOLDER"], os.environ["PROFILE"])
+    writeDlcToGameFile(TARGET_JSON, dlcs)
+    sfm.encrypt_save_info(TARGET_JSON, GAME_FILE_NAME)
+
+
 def getAllMods() -> List[Mod]:
     _, _, disabled_mods, enabled_mods = getCategorisedMods()
     return enabled_mods + disabled_mods
+
+
+def getOwnedDlc(json_data: dict) -> List[DLC]:
+    dlc_data: List[DLC] = []
+    if "presented_dlc" in json_data["base_root"] and "dlc" in json_data["base_root"]["presented_dlc"]:
+        for entry in json_data["base_root"]["presented_dlc"]["dlc"]:
+            dlc_data.append(
+                    DlcList.getByName(json_data["base_root"]["presented_dlc"]["dlc"][entry]["name"])
+            )
+    return dlc_data
+
+
+def getEnabledDlc(json_data: dict) -> List[SubDLC]:
+    dlc_data: List[SubDLC] = []
+    if "dlc" in json_data["base_root"]:
+        for entry in json_data["base_root"]["dlc"]:
+            dlc_data.append(
+                    SubDlcList.getByName(json_data["base_root"]["dlc"][entry]["name"])
+            )
+    return dlc_data
+
+
+def getDlcs() -> (List[DLC], List[SubDLC]):
+    if "SAVES_FOLDER" in os.environ and os.path.exists(os.environ["SAVES_FOLDER"]):
+        SaveFileManager(os.environ["SAVE_EDITOR_JAR_PATH"], os.environ["SAVES_FOLDER"],
+                        os.environ["PROFILE"]).decrypt_save_info(TARGET_JSON, GAME_FILE_NAME)
+        with open(TARGET_JSON, "r", encoding="utf-8") as f:
+            json_data = json.load(f)
+
+        return getOwnedDlc(json_data), getEnabledDlc(json_data)
 
 
 def getCategorisedMods() -> (List[Mod], List[Mod], List[Mod], List[Mod]):
@@ -193,15 +248,15 @@ def getCategorisedMods() -> (List[Mod], List[Mod], List[Mod], List[Mod]):
     if "GAME_FOLDER" in os.environ and os.path.exists(os.environ["GAME_FOLDER"]):
         installed_mods = get_mods_from_folder(util.mods_path(os.environ["GAME_FOLDER"]), ModSources.Local)
     else:
-        print("Game local mods folder not found")
+        logger.warn("Game local mods folder not found")
 
     if "MODS_FOLDER_STEAM" in os.environ and os.path.exists(os.environ["MODS_FOLDER_STEAM"]):
         installed_mods = installed_mods + get_mods_from_folder(os.environ["MODS_FOLDER_STEAM"], ModSources.Steam)
     else:
-        print("Steam mods folder not found")
+        logger.warn("Steam mods folder not found")
 
     if len(installed_mods) == 0:
-        print("No installed mods found")
+        logger.warn("No installed mods found")
 
     disabled_mods = installed_mods.copy()
     enabled_mods = []
@@ -232,11 +287,11 @@ def getCategorisedMods() -> (List[Mod], List[Mod], List[Mod], List[Mod]):
                             is_installed = True
                             break
                 if not is_installed:
-                    deleted_mod = Mod("0", mod_name, mod_source, installed=False)
+                    deleted_mod = Mod(mod_name if mod_name.isdigit() else "0", mod_name, mod_source, installed=False)
                     enabled_mods.append(deleted_mod)
                     uninstalled_mods.append(deleted_mod)
         except Exception as err:
-            print(err)
+            logger.error(err)
 
         for mod in enabled_mods:
             if mod in disabled_mods:
@@ -248,11 +303,12 @@ def getCategorisedMods() -> (List[Mod], List[Mod], List[Mod], List[Mod]):
 
 
 def getFromCache(installed_mods: List[Mod], uninstalled_mods: List[Mod]) -> None:
-    for uncached_mod in metadataCache.retrieveModsMetadata(installed_mods):
-        uncached_mod.setMetadata(ModMetadata(*scrapper.get_mod_info_by_id(uncached_mod.id)))
-        metadataCache.addToCache([uncached_mod.metadata])
-    for uncached_mod in metadataCache.retrieveModsMetadata(uninstalled_mods):
-        if uncached_mod.id:
-            uncached_mod.setMetadata(ModMetadata(*scrapper.get_mod_info_by_id(uncached_mod.id)))
-            metadataCache.addToCache([uncached_mod.metadata])
+    for list_mods in [installed_mods, uninstalled_mods]:
+        for uncached_mod in metadataCache.retrieveModsMetadata(list_mods):
+            signal_manager.s_loading_mods.emit(uncached_mod.toString())
+            if uncached_mod.id and uncached_mod.id != "0":
+                mod_data = scrapper.get_mod_info_by_id(uncached_mod.id)
+                if mod_data:
+                    uncached_mod.setMetadata(ModMetadata(*mod_data))
+                    metadataCache.addToCache([uncached_mod.metadata])
     metadataCache.saveCache()

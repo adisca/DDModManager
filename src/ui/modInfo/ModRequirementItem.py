@@ -1,8 +1,9 @@
 from PySide2.QtCore import Qt, QMimeData, Signal
-from PySide2.QtGui import QDrag, QPixmap, QPalette, QColor, QFont, QFontMetrics, QImage, QIcon
+from PySide2.QtGui import QDrag, QPixmap, QPalette, QColor, QFont, QFontMetrics, QImage, QIcon, QMouseEvent
 from PySide2.QtWidgets import QWidget, QHBoxLayout, QLabel
 
 from constants.pathsImgs import *
+from shared.logger import logger
 
 
 class ModRequirementStates:
@@ -17,6 +18,10 @@ class ModRequirementItem(QWidget):
 
     IMG_W = 50
     IMG_H = 50
+
+    clicked = Signal(str)
+
+    fulfilled = ModRequirementStates.Unfulfilled
 
     def __init__(self, name: str, fulfilled: ModRequirementStates = ModRequirementStates.Unfulfilled):
         super().__init__()
@@ -61,20 +66,14 @@ class ModRequirementItem(QWidget):
             img = QPixmap(EXCLAMATION_IMG)
         else:
             img = QPixmap(CROSS_IMG)
+
+        self.fulfilled = fulfilled
+
         img = img.scaled(self.IMG_W, self.IMG_H, Qt.KeepAspectRatio)
         self.labelImg.setPixmap(img)
 
-        # self.refreshBackgroundColor()
-
-    # def refreshBackgroundColor(self):
-    #     palette = self.palette()
-    #
-    #     if not self.mod.installed:
-    #         palette.setColor(QPalette.Window, QColor(140, 0, 0))
-    #     elif self.mod.active:
-    #         palette.setColor(QPalette.Window, QColor(0, 100, 0))
-    #     else:
-    #         palette.setColor(QPalette.Window, QColor(140, 140, 140))
-    #
-    #     self.setPalette(palette)
-    #     self.setAutoFillBackground(True)
+    def mouseReleaseEvent(self, e: QMouseEvent) -> None:
+        name = self.nameLabel.text()
+        logger.debug(f"Click {name} req item")
+        if self.fulfilled == ModRequirementStates.Incomplete:
+            self.clicked.emit(name)

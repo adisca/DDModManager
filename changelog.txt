@@ -1,0 +1,61 @@
+[v0.4.0]
+- Add logger
+- Add changelog
+- Add dlc management through a new dialog window available as a menu action
+- Add a dlc db to keep track of owned and active dlcs
+- Add a loading mods dialog so the app doesn't seem stuck while loading
+- Add a signal manager for a low coupling communication between logic and components
+- Fix tags not being set properly
+- Add a thread operation to handle the mod loading
+- Add clear functions to the mod info tabs
+- The mod db now reflects changes in the interface
+- The mod info panel is now updated when changes are made in the mod or dlc db
+- Implement the mod requirements status functionality to visually display it
+- Add onclick actions to the incomplete requirements (the ones with '!'). For dlcs it will open the dlcs window, for mods it will filter by their names
+- Improve the path settings flow to only reload the mods if changes were made
+
+[v0.3.1]
+- Fix a bug with the tags displaying weirdly
+
+[v0.3.0]
+- Add filter options
+
+[v0.2.1]
+- Add typing, removed unused methods, formatting
+
+[v0.2.0]
+- Update the mod info panel
+- Add info tabs for status, requirements, description and a browser
+- Add a new flow layout capable of widget wrapping
+- Add new images for the dlcs and ui
+- Add description and tags fields for Mod, gathered from project.xml
+- Add a new util method to transform mod description custom bbcode into html
+- Remove mod description from metadata and added authors
+- Replace the old DLC dictionary with a new DlcList
+- Update the scrapper to fetch the new data
+- Moved the img paths to a new pathsImgs file
+- Rename and moved a bunch of files
+
+[v0.1.1]
+- Update .gitignore
+
+[v0.1.0]
+- Add Play button to start the game
+- Rename VDragWidget to ModDisplayArea
+- App now makes sure that the current working directory is the right one
+- Taskbar icon should now display correctly
+- Fix the paths, again
+- Add new paths for the default modlist folder and the placeholder img
+- Remove resize_img() function from util
+- Done a lot of formatting
+- Rename "loadLocalModlist" to "loadCsvModlist" in ModDB and dd_stuff
+
+[v0.0.1]
+- Small fixes after clean installation
+- Add requirements.txt
+- Required directories are now created on start
+- Update the internal paths
+- Comment util.resize_img() in preparation for removal
+
+[v0.0.0]
+- Upload base project

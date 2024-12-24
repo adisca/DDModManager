@@ -3,6 +3,8 @@ import subprocess
 
 from pathlib import Path
 
+from shared.logger import logger
+
 
 class SaveFileManager:
     def __init__(self, save_editor_jar_path: str, saves_location: str, profile_nb: str):
@@ -22,18 +24,18 @@ class SaveFileManager:
 
     def decrypt_save_info(self, outputPath: str, fileName: str) -> None:
         if not os.path.exists(Path(f'{self.SaveProfilePath}/{fileName}')):
-            print(f"{fileName} doesn't exist encrypted")
+            logger.error(f"{fileName} doesn't exist encrypted")
             raise FileNotFoundError
         else:
             subprocess.call(['java', '-jar', Path(f'{self.SaveEditorPath}'), 'decode',
                              '-o', outputPath, Path(f'{self.SaveProfilePath}/{fileName}')])
-            print(f'decrypted {fileName}!')
+            logger.debug(f'Decrypted {fileName}!')
 
     def encrypt_save_info(self, inputPath: str, fileName: str) -> None:
         if not os.path.exists(inputPath):
-            print(f"{inputPath} doesn't exist decrypted")
+            logger.error(f"{inputPath} doesn't exist decrypted")
             raise FileNotFoundError
         else:
             subprocess.call(['java', '-jar', Path(f'{self.SaveEditorPath}'), 'encode',
                              '-o', Path(f'{self.SaveProfilePath}/{fileName}'), inputPath])
-            print(f'encrypted {inputPath}!')
+            logger.debug(f'Encrypted {inputPath}!')

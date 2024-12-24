@@ -3,15 +3,15 @@ from typing import Callable
 
 import dotenv
 
-from PySide2.QtCore import QObject, Signal
+from PySide2.QtCore import QObject
 from PySide2.QtWidgets import QFileDialog, QGridLayout, QPushButton, QLabel, QLineEdit, \
     QComboBox, QVBoxLayout, QGroupBox, QHBoxLayout, QDialog
 
 from constants.paths import *
+from src.shared.signals import signal_manager
 
 
 class SettingsWindow(QDialog):
-    changedSettings = Signal()
 
     def __init__(self):
         super().__init__()
@@ -169,32 +169,42 @@ class SettingsWindow(QDialog):
         return browse
 
     def _onSettingsSave(self) -> None:
-        os.environ["SAVE_EDITOR_JAR_PATH"] = self.txtSaveEditorJar.text()
-        os.environ["GAME_FOLDER"] = self.txtGameFolder.text()
-        os.environ["MODS_FOLDER_STEAM"] = self.txtModsFolderSteam.text()
-        os.environ["SAVES_FOLDER"] = self.txtSavesFolder.text()
-        os.environ["PROFILE"] = self.comboProfile.currentText()
+        if self._changesMade():
+            os.environ["SAVE_EDITOR_JAR_PATH"] = self.txtSaveEditorJar.text()
+            os.environ["GAME_FOLDER"] = self.txtGameFolder.text()
+            os.environ["MODS_FOLDER_STEAM"] = self.txtModsFolderSteam.text()
+            os.environ["SAVES_FOLDER"] = self.txtSavesFolder.text()
+            os.environ["PROFILE"] = self.comboProfile.currentText()
 
-        dotenv.set_key(ENV_FILE, "SAVE_EDITOR_JAR_PATH", os.environ["SAVE_EDITOR_JAR_PATH"])
-        dotenv.set_key(ENV_FILE, "GAME_FOLDER", os.environ["GAME_FOLDER"])
-        dotenv.set_key(ENV_FILE, "MODS_FOLDER_STEAM", os.environ["MODS_FOLDER_STEAM"])
-        dotenv.set_key(ENV_FILE, "SAVES_FOLDER", os.environ["SAVES_FOLDER"])
-        dotenv.set_key(ENV_FILE, "PROFILE", os.environ["PROFILE"])
+            dotenv.set_key(ENV_FILE, "SAVE_EDITOR_JAR_PATH", os.environ["SAVE_EDITOR_JAR_PATH"])
+            dotenv.set_key(ENV_FILE, "GAME_FOLDER", os.environ["GAME_FOLDER"])
+            dotenv.set_key(ENV_FILE, "MODS_FOLDER_STEAM", os.environ["MODS_FOLDER_STEAM"])
+            dotenv.set_key(ENV_FILE, "SAVES_FOLDER", os.environ["SAVES_FOLDER"])
+            dotenv.set_key(ENV_FILE, "PROFILE", os.environ["PROFILE"])
 
-        self.changedSettings.emit()
+            signal_manager.s_changed_settings.emit()
 
         self.close()
 
     def _onSettingsApply(self) -> None:
-        os.environ["SAVE_EDITOR_JAR_PATH"] = self.txtSaveEditorJar.text()
-        os.environ["GAME_FOLDER"] = self.txtGameFolder.text()
-        os.environ["MODS_FOLDER_STEAM"] = self.txtModsFolderSteam.text()
-        os.environ["SAVES_FOLDER"] = self.txtSavesFolder.text()
-        os.environ["PROFILE"] = self.comboProfile.currentText()
+        if self._changesMade():
+            os.environ["SAVE_EDITOR_JAR_PATH"] = self.txtSaveEditorJar.text()
+            os.environ["GAME_FOLDER"] = self.txtGameFolder.text()
+            os.environ["MODS_FOLDER_STEAM"] = self.txtModsFolderSteam.text()
+            os.environ["SAVES_FOLDER"] = self.txtSavesFolder.text()
+            os.environ["PROFILE"] = self.comboProfile.currentText()
 
-        self.changedSettings.emit()
+            signal_manager.s_changed_settings.emit()
 
         self.close()
 
     def _onSettingsClose(self) -> None:
         self.close()
+
+    def _changesMade(self) -> bool:
+        return os.environ["SAVE_EDITOR_JAR_PATH"] != self.txtSaveEditorJar.text() or \
+               os.environ["GAME_FOLDER"] != self.txtGameFolder.text() or \
+               os.environ["MODS_FOLDER_STEAM"] != self.txtModsFolderSteam.text() or \
+               os.environ["SAVES_FOLDER"] != self.txtSavesFolder.text() or \
+               os.environ["PROFILE"] != self.comboProfile.currentText()
+

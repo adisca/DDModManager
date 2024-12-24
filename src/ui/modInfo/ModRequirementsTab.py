@@ -2,9 +2,13 @@ from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QWidget, QVBoxLayout, QGroupBox
 
 from logic.Mod import Mod
-from logic.DlcList import DlcList
+from logic.DlcDB import DlcList, DlcDB
 from logic.CacheModMetadata import metadataCache
-from ui.modInfo.ModRequirementItem import ModRequirementItem
+from shared.signals import signal_manager
+from ui.dlcManagement.DlcWindow import DlcWindow
+from ui.modInfo.ModRequirementItem import ModRequirementItem, ModRequirementStates
+from shared.logger import logger
+from logic.ModDB import ModDB
 
 
 class ModRequirementsTab(QWidget):
@@ -32,15 +36,53 @@ class ModRequirementsTab(QWidget):
 
     def loadMod(self, mod: Mod) -> None:
         if not mod.metadata:
-            print(f"Mod {mod.id} {mod.name} has no metadata to show")
+            logger.warn(f"Mod {mod.id} {mod.name} has no metadata to show")
             return
 
+        self.clear()
+
+        for dlc in mod.metadata.req_dlc:
+            for enabled_dlc in DlcDB.activeDlc:
+                if enabled_dlc.dlc.id == dlc:
+                    status = ModRequirementStates.Fulfilled
+                    break
+            else:
+                for owned_dlc in DlcDB.ownedDlc:
+                    if owned_dlc.id == dlc:
+                        status = ModRequirementStates.Incomplete
+                        break
+                else:
+                    status = ModRequirementStates.Unfulfilled
+            dlcReqItem = ModRequirementItem(DlcList.getById(dlc).title, status)
+            dlcReqItem.clicked.connect(self.openDlcWindow)
+            self.vboxRequiredDLC.addWidget(dlcReqItem)
+
+        for req_mod in mod.metadata.req_mods:
+            for enabled_mod in ModDB.enabledMods:
+                if enabled_mod.id == req_mod:
+                    status = ModRequirementStates.Fulfilled
+                    break
+            else:
+                for disabled_mod in ModDB.disabledMods:
+                    if disabled_mod.id == req_mod:
+                        status = ModRequirementStates.Incomplete
+                        break
+                else:
+                    status = ModRequirementStates.Unfulfilled
+            modReqItem = ModRequirementItem(metadataCache.getById(req_mod, {"name": req_mod}).name, status)
+            modReqItem.clicked.connect(self.searchForMod)
+            self.vboxRequiredMods.addWidget(modReqItem)
+
+    def clear(self) -> None:
         for i in reversed(range(self.vboxRequiredDLC.count())):
             self.vboxRequiredDLC.takeAt(i).widget().deleteLater()
-        for dlc in mod.metadata.req_dlc:
-            self.vboxRequiredDLC.addWidget(ModRequirementItem(DlcList.getById(dlc).title))
-
         for i in reversed(range(self.vboxRequiredMods.count())):
             self.vboxRequiredMods.takeAt(i).widget().deleteLater()
-        for req_mod in mod.metadata.req_mods:
-            self.vboxRequiredMods.addWidget(ModRequirementItem(metadataCache.getById(req_mod, {"name": req_mod}).name))
+
+    @staticmethod
+    def openDlcWindow(_: str) -> None:
+        DlcWindow().exec_()
+
+    @staticmethod
+    def searchForMod(name: str) -> None:
+        signal_manager.s_set_name_filter.emit(name)

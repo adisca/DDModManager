@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 import logic.scrapper as scrapper
 import logic.util as util
 from logic.Mod import Mod
+from shared.logger import logger
 
 
 class ModDescriptionTab(QWebEngineView):
@@ -21,13 +22,16 @@ class ModDescriptionTab(QWebEngineView):
     def _initialize(self) -> None:
         self.setPage(SafeDescPage(self))
         self.page().denied_nav_req.connect(self.denied_nav_req.emit)
-        self.setHtml('<body style="background-color:black;"></body>')
+        self.setHtml('<body style="background-color:#333333;"></body>')
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
 
     def loadMod(self, mod: Mod) -> None:
         self.setHtml(str(scrapper.add_tags_to_body(scrapper.add_steam_css(scrapper.create_empty_html()),
                                                    [BeautifulSoup(util.convert_bbcode_to_html(mod.desc),
                                                                   "html.parser")])))
+
+    def clear(self) -> None:
+        self.setHtml('<body style="background-color:#333333;"></body>')
 
 
 class SafeDescPage(QWebEnginePage):
@@ -39,7 +43,7 @@ class SafeDescPage(QWebEnginePage):
 
         if _type not in [QWebEnginePage.NavigationType.NavigationTypeTyped,
                          QWebEnginePage.NavigationType.NavigationTypeReload]:
-            print(f"Nav request denied: {_type} {isMainFrame} {url}\n")
+            logger.warn(f"Nav request denied: {_type} {isMainFrame} {url}\n")
             self.denied_nav_req.emit(url)
             return False
 
